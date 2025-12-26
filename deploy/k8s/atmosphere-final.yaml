@@ -1,0 +1,19 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: atmosphere-v2-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: weather-app
+  minReplicaCount: 2
+  maxReplicaCount: 15
+  pollingInterval: 5
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: atmosphere-bus-kafka.default.svc.cluster.local:9092
+      consumerGroup: atmosphere-v2-group
+      topic: scaling-signals
+      lagThreshold: '1' # Any lag will now trigger scaling
+    metricType: Value

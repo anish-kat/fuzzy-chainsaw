@@ -1,0 +1,17 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: atmosphere-scaling-engine
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: weather-app
+  minReplicaCount: 2
+  maxReplicaCount: 15
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: 10.96.62.205:9092
+      consumerGroup: atmosphere-group
+      topic: scaling-signals
+      lagThreshold: '1'

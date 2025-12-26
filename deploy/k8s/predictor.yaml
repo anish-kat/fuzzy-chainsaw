@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: predictor-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: predictor
+  template:
+    metadata:
+      labels:
+        app: predictor
+    spec:
+      containers:
+      - name: predictor
+        image: atmosphere-predictor:v1
+        imagePullPolicy: Never
+        env:
+        - name: KAFKA_BROKER
+          value: "atmosphere-bus-kafka:9092"
+        # SRE Best Practice: Liveness probes
+        livenessProbe:
+          exec:
+            command:
+            - pgrep
+            - python
+          initialDelaySeconds: 10
+          periodSeconds: 5
