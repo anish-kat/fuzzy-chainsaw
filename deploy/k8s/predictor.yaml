@@ -19,7 +19,6 @@ spec:
         env:
         - name: KAFKA_BROKER
           value: "atmosphere-bus-kafka:9092"
-        # SRE Best Practice: Liveness probes
         livenessProbe:
           exec:
             command:
