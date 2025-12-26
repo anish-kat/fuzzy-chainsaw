@@ -6,14 +6,15 @@ metadata:
 spec:
   scaleTargetRef:
     name: weather-app
-  minReplicaCount: 2
+  minReplicaCount: 0     
   maxReplicaCount: 15
   pollingInterval: 5
+  cooldownPeriod: 60      
   triggers:
   - type: kafka
     metadata:
       bootstrapServers: atmosphere-bus-kafka.default.svc.cluster.local:9092
       consumerGroup: atmosphere-v2-group
       topic: scaling-signals
-      lagThreshold: '1' # Any lag will now trigger scaling
+      lagThreshold: '1'
     metricType: Value

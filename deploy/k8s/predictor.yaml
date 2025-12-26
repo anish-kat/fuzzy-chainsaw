@@ -2,11 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: predictor-engine
+  namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: predictor
+      app: predictor # This MUST match the template labels below
   template:
     metadata:
       labels:
@@ -14,10 +15,13 @@ spec:
     spec:
       containers:
       - name: predictor
-        image: atmosphere-predictor:v1
-        imagePullPolicy: Never
+        image: predictor-llm:v4 
+        imagePullPolicy: IfNotPresent
         env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
         - name: KAFKA_BROKER
+<<<<<<< HEAD
           value: "atmosphere-bus-kafka:9092"
         livenessProbe:
           exec:
@@ -26,3 +30,11 @@ spec:
             - python
           initialDelaySeconds: 10
           periodSeconds: 5
+=======
+          value: "atmosphere-bus-kafka.default.svc.cluster.local:9092"
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-credentials
+              key: OPENAI_API_KEY
+>>>>>>> 4a7d044 (updated app to provide AI driven analysis)

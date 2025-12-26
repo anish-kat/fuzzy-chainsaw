@@ -1,57 +1,61 @@
 import os
 import json
 import time
-import logging
+import pandas as pd
+import kagglehub
 from kafka import KafkaProducer
+from openai import OpenAI
 
-# 1. Setup Logging (Industry Standard for SRE)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# --- CONFIGURATION ---
+KAFKA_BROKER = os.getenv('KAFKA_BROKER', 'atmosphere-bus-kafka.default.svc.cluster.local:9092')
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-# 2. Configuration from Environment (Security Best Practice)
-KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
-TOPIC = "scaling-signals"
+producer = KafkaProducer(
+    bootstrap_servers=[KAFKA_BROKER],
+    value_serializer=lambda x: json.dumps(x).encode('utf-8')
+)
 
-def get_kafka_producer():
-    """Connect to Kafka with retry logic."""
-    for i in range(5):
-        try:
-            return KafkaProducer(
-                bootstrap_servers=[KAFKA_BROKER],
-                value_serializer=lambda v: json.dumps(v).encode('utf-8')
-            )
-        except Exception as e:
-            logger.error(f"Kafka connection failed. Retry {i+1}/5...")
-            time.sleep(5)
-    raise Exception("Could not connect to Kafka.")
-
-def predict_load():
-    """
-    Simulated ML logic. In production, this would call a model 
-    or a Weather API to forecast a traffic spike.
-    """
-    # Simulate finding a 'Severe Weather' event
-    is_storm_coming = True 
+def analyze_with_llm(row):
+    """Uses GPT-4o-mini to decide if we need to scale the infra."""
+    prompt = f"""
+    Analyze the following weather data and decide if it represents an extreme event 
+    that would cause a surge in app traffic (heatwaves, storms, extreme wind).
     
-    if is_storm_coming:
-        return {
-            "version": "1.0",
-            "timestamp": int(time.time()),
-            "action": "scale_up",
-            "target_replicas": 15,
-            "metadata": {"reason": "Predicted Storm Spike", "confidence": 0.92}
-        }
-    return {"action": "maintain", "target_replicas": 2}
-
-if __name__ == "__main__":
-    logger.info("Atmosphere Predictor Engine Starting...")
-    producer = get_kafka_producer()
+    Data: {row.to_json()}
+    
+    Respond ONLY in JSON format:
+    {{"action": "SCALE_UP" or "STABLE", "reason": "brief explanation"}}
+    """
     
     try:
-        while True:
-            signal = predict_load()
-            producer.send(TOPIC, signal)
-            logger.info(f"Published Signal: {signal['action']} -> {signal['target_replicas']} replicas")
-            time.sleep(30) # Check every 30 seconds
-    except KeyboardInterrupt:
-        logger.info("Shutting down Predictor...")
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={ "type": "json_object" }
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        print(f"LLM Error: {e}")
+        return {"action": "STABLE"}
+
+def start_streaming():
+    csv_path = get_dataset()
+    df = pd.read_csv(csv_path)
+    print(f"✅ Dataset loaded! Analyzing {len(df)} global locations...")
+
+    for index, row in df.iterrows():
+        # This heartbeat ensures the logs stay 'alive'
+        city = row.get('location_name', 'Unknown')
+        print(f"🕒 [{index}] Consulting AI for {city}...", flush=True)
+
+        analysis = analyze_with_llm(row)
+        
+        if analysis["action"] == "SCALE_UP":
+            print(f"🚨 AI ALERT for {city}: {analysis['reason']}", flush=True)
+            producer.send('scaling-signals', value=analysis)
+            producer.flush()
+        
+        time.sleep(2)
+
+if __name__ == "__main__":
+    start_streaming()
