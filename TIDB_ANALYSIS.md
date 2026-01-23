@@ -46,3 +46,7 @@ TiDB is a distributed SQL database that separates **Compute** from **Storage**. 
 - Component: pkg/expression
 - Goal: Implement vectorized execution for a Math/Statistical function.
 - Method: Identifying missing 'vecEval' methods in Sig structs.
+## 🚀 Feature Implementation: Vectorized SQRT
+- **Target:** builtinSqrtSig in pkg/expression/builtin_math.go
+- **Improvement:** Implemented vecEvalReal to enable batch processing of square root calculations.
+- **Key Learning:** Learned how TiDB uses Chunk and Column structures to minimize memory allocation during query execution.
