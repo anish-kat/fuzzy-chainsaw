@@ -30,3 +30,11 @@ TiDB is a distributed SQL database that separates **Compute** from **Storage**. 
 ## 📝 Learning Journal
 * **Challenge**: Understanding how TiDB translates SQL into Key-Value pairs.
 * **Insight**: TiDB maps table rows to KV pairs using `TableID`, `RowID`, and `ColumnID` to ensure unique keys in the global TiKV space.
+
+- **Status:** In Progress / PR Opened
+- **Technical Challenge:** TiDB's vector-based execution engine requires functions to handle "Chunks" of data rather than row-by-row.
+- **Files Modified:** - `pkg/expression/builtin_math.go` (Logic)
+  - `pkg/expression/builtin_math_test.go` (Unit Tests)
+### Phase 2: Code Exploration
+- Identified bottleneck: MySQL 9.6 client compatibility (Resolved via Go-native client).
+- Researching: Vectorized expression evaluation in /pkg/expression.
