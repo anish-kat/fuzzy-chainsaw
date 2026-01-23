@@ -58,3 +58,9 @@ TiDB is a distributed SQL database that separates **Compute** from **Storage**. 
 - **Discovery:** TiDB moved vectorized logic to `builtin_math_vec.go` to separate execution paths.
 - **Refactor:** Updated code to match the latest `chunk.Column` API (Float64s vs Reals).
 - **Debug:** Resolved method redeclaration by modifying the existing vec-file instead of the scalar-file.
+
+## 🏁 Final Project Conclusion
+- **Objective:** Improve analytical query performance in TiDB by vectorizing built-in math functions.
+- **Outcome:** Successfully implemented and verified `vecEvalReal` for the SQRT function.
+- **Performance Impact:** Enabled batch processing (default 1024 rows) for square root calculations, reducing function call overhead and improving cache locality.
+- **Skills Demonstrated:** Golang, Distributed System Architecture, Vectorized Execution, SQL Handshaking, and Unit/Integration Testing.
