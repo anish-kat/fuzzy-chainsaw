@@ -42,3 +42,7 @@ TiDB is a distributed SQL database that separates **Compute** from **Storage**. 
 - Resolved MySQL 9.6 incompatibility by pinning mysql@8.0 client.
 - Successfully connected to local TiDB server on port 4000.
 - Verified cluster status using 'SHOW TABLE REGIONS'.
+### Phase 3: Technical Analysis
+- Component: pkg/expression
+- Goal: Implement vectorized execution for a Math/Statistical function.
+- Method: Identifying missing 'vecEval' methods in Sig structs.
