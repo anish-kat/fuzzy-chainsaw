@@ -54,3 +54,7 @@ TiDB is a distributed SQL database that separates **Compute** from **Storage**. 
 - **Issue:** Encountered 'undefined' errors when running tests on single files.
 - **Solution:** Shifted to package-level testing to resolve internal dependencies.
 - **Command:** `go test -v ./pkg/expression -run TestSqrt`
+### Phase 5: Adapting to Modern API
+- **Discovery:** TiDB moved vectorized logic to `builtin_math_vec.go` to separate execution paths.
+- **Refactor:** Updated code to match the latest `chunk.Column` API (Float64s vs Reals).
+- **Debug:** Resolved method redeclaration by modifying the existing vec-file instead of the scalar-file.
