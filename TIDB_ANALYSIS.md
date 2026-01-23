@@ -50,3 +50,7 @@ TiDB is a distributed SQL database that separates **Compute** from **Storage**. 
 - **Target:** builtinSqrtSig in pkg/expression/builtin_math.go
 - **Improvement:** Implemented vecEvalReal to enable batch processing of square root calculations.
 - **Key Learning:** Learned how TiDB uses Chunk and Column structures to minimize memory allocation during query execution.
+### Phase 4: Testing & Debugging
+- **Issue:** Encountered 'undefined' errors when running tests on single files.
+- **Solution:** Shifted to package-level testing to resolve internal dependencies.
+- **Command:** `go test -v ./pkg/expression -run TestSqrt`
